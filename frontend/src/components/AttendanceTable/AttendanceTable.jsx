@@ -54,7 +54,7 @@ const AttendanceTable = () => {
     useEffect(() => {
         const fetchAttendance = async () => {
             try {
-                const response = await fetch(`https://sensitivetechcrm.onrender.com/attendance/attendance-all/${employeeId}`);
+                const response = await fetch(`https://sensitive-crm.onrender.com/attendance/attendance-all/${employeeId}`);
                 if (!response.ok) throw new Error("Failed to fetch attendance data.");
                 const data = await response.json();
                 data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
