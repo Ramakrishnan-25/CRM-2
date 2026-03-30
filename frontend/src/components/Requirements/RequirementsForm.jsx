@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import logo from "../../assets/logo.png";
-import Step5 from "./step5";
+import Step5 from "./Step5";
 import { useNavigate } from "react-router-dom";
 import Preview from "./Preview";
 
@@ -90,7 +90,6 @@ const RequirementsForm = () => {
   const [openWebSub, setOpenWebSub] = useState(null);
   const [openWpChild, setOpenWpChild] = useState(null);
 
-
   // Centralized state for all selections
   const [selections, setSelections] = useState({});
   const navigate = useNavigate();
@@ -104,42 +103,42 @@ const RequirementsForm = () => {
   /* ================= STEP 1 VALIDATION ================= */
   /* ================= WEBSITE DESIGNING (ALL SUB DATA REQUIRED) ================= */
 
-const validateStep1 = () => {
-  // Required main dropdowns
-  const requiredMainDropdowns = [
-    "Web Portal Development",
-    "Mobile App Development",
-    "Custom Software Development",
-    "API Integration",
-  ];
+  const validateStep1 = () => {
+    // Required main dropdowns
+    const requiredMainDropdowns = [
+      "Web Portal Development",
+      "Mobile App Development",
+      "Custom Software Development",
+      "API Integration",
+    ];
 
-  for (let key of requiredMainDropdowns) {
-  const selected = selections[key];
-  if (!selected) return false;
+    for (let key of requiredMainDropdowns) {
+      const selected = selections[key];
+      if (!selected) return false;
 
-  if (selected === "Others" && !selections[`${key}_other`]?.trim()) {
-    return false;
-  }
-}
+      if (selected === "Others" && !selections[`${key}_other`]?.trim()) {
+        return false;
+      }
+    }
 
-  // Website Designing fields
-  const websiteDesigningFields = [
-    "Static Website Pages",
-    "Themes License",
-    "Plugins",
-    "Number of Pages WP",
-    "Subscription / Blogs",
-    "Number of Pages Ecom",
-    "Number of Products",
-  ];
+    // Website Designing fields
+    const websiteDesigningFields = [
+      "Static Website Pages",
+      "Themes License",
+      "Plugins",
+      "Number of Pages WP",
+      "Subscription / Blogs",
+      "Number of Pages Ecom",
+      "Number of Products",
+    ];
 
-  for (let field of websiteDesigningFields) {
-    if (!selections[field] || selections[field].toString().trim() === "") return false;
-  }
+    for (let field of websiteDesigningFields) {
+      if (!selections[field] || selections[field].toString().trim() === "")
+        return false;
+    }
 
-  return true;
-};
-
+    return true;
+  };
 
   /* ================= STEP 2 VALIDATION ================= */
 
@@ -152,7 +151,7 @@ const validateStep1 = () => {
       "5. Contents",
       "6. Testing / Staging",
       "7. 3rd Party API Integration(s)",
-      "8. SMTP Mailer Service"
+      "8. SMTP Mailer Service",
     ];
 
     for (let key of requiredTech) {
@@ -165,19 +164,21 @@ const validateStep1 = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-    <div className="bg-blue-600 border-b sticky top-0 z-40 shadow-sm">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex justify-center">
-        <div className="flex items-center gap-4">
+      <div className="bg-blue-600 border-b sticky top-0 z-40 shadow-sm">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-center">
+          <div className="flex items-center gap-4">
+            <img
+              src={logo}
+              alt="Sensitive Technologies"
+              className="h-10 w-auto object-contain"
+            />
 
-          <img src={logo} alt="Sensitive Technologies" className="h-10 w-auto object-contain"/>
-
-          <span className=" text-2xl font-semibold tracking-wide text-white font-sans">
-            Sensitive Technologies
-          </span>
-
+            <span className=" text-2xl font-semibold tracking-wide text-white font-sans">
+              Sensitive Technologies
+            </span>
+          </div>
         </div>
       </div>
-    </div>
 
       <div className="max-w-5xl mx-auto px-6 py-10">
         {/* STEP INDICATOR */}
@@ -195,7 +196,7 @@ const validateStep1 = () => {
           <Step1
             openMain={openMain}
             openWebSub={openWebSub}
-            openWpChild={openWpChild} 
+            openWpChild={openWpChild}
             toggleMain={toggleMain}
             selections={selections}
             setSelections={setSelections}
@@ -274,7 +275,7 @@ const validateStep1 = () => {
   );
 };
 
- /* ================= STEP 1 COMPONENT ================= */
+/* ================= STEP 1 COMPONENT ================= */
 
 const Step1 = ({
   openMain,
@@ -321,8 +322,16 @@ const Step1 = ({
           >
             {/* MAIN FIELDS */}
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <Input label="Themes License" selections={selections} setSelections={setSelections} />
-              <Input label="Plugins" selections={selections} setSelections={setSelections} />
+              <Input
+                label="Themes License"
+                selections={selections}
+                setSelections={setSelections}
+              />
+              <Input
+                label="Plugins"
+                selections={selections}
+                setSelections={setSelections}
+              />
             </div>
 
             {/* CHILD 1 */}
@@ -550,7 +559,6 @@ const Step2 = ({
     <NavButtons onPrev={onPrev} onNext={onNext} />
   </div>
 );
-
 
 /* ================= STEP 3 COMPONENT ================= */
 
@@ -798,9 +806,7 @@ const Step4 = ({
 const Step = ({ active, children }) => (
   <div
     className={`px-4 py-2 rounded-full text-sm font-medium ${
-      active
-        ? "bg-blue-600 text-white"
-        : "bg-slate-200 text-slate-600"
+      active ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-600"
     }`}
   >
     {children}
@@ -808,9 +814,7 @@ const Step = ({ active, children }) => (
 );
 
 const Card = ({ children }) => (
-  <div className="bg-white p-6 rounded-2xl border shadow-sm">
-    {children}
-  </div>
+  <div className="bg-white p-6 rounded-2xl border shadow-sm">{children}</div>
 );
 
 const CardHeader = ({ title, onClick, active }) => (
@@ -897,7 +901,6 @@ const SingleDropdown = ({
   );
 };
 
-
 const Input = ({ label, type = "text", selections, setSelections }) => (
   <div>
     <label className="text-sm text-slate-600">{label}</label>
@@ -918,9 +921,7 @@ const NavButtons = ({ onPrev, onNext, disablePrev }) => (
       disabled={disablePrev}
       onClick={onPrev}
       className={`px-6 py-2 rounded-lg ${
-        disablePrev
-          ? "bg-slate-200 text-slate-400"
-          : "bg-slate-600 text-white"
+        disablePrev ? "bg-slate-200 text-slate-400" : "bg-slate-600 text-white"
       }`}
     >
       Previous
