@@ -297,7 +297,7 @@ const EmployeeTable = () => {
               </button>
 
               {/* Toggle Status Icon */}
-              <button
+              {/* <button
                 onClick={() => handleToggleStatus(emp)}
                 className={`p-2 rounded-full transition-colors ${
                   emp.status === "Active"
@@ -306,9 +306,9 @@ const EmployeeTable = () => {
                 }`}
                 title={emp.status === "Active" ? "Set Inactive" : "Set Active"}
               >
-                {/* Use Eye icon as placeholder; can replace with a different icon */}
+              
                 <Eye size={18} />
-              </button>
+              </button> */}
 
               {/* Delete Employee */}
               <button

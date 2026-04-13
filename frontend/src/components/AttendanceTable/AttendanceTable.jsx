@@ -8,6 +8,10 @@ import {
 import { FaPlus, FaFileDownload, FaFilter, FaEye, FaExclamationTriangle } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
+import axios from "axios";
+
+// Base URL Configuration
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const AttendanceTable = () => {
     const employeeId = localStorage.getItem("empId");
@@ -54,22 +58,30 @@ const AttendanceTable = () => {
     useEffect(() => {
         const fetchAttendance = async () => {
             try {
-                const response = await fetch(`https://sensitive-crm.onrender.com/attendance/attendance-all/${employeeId}`);
-                if (!response.ok) throw new Error("Failed to fetch attendance data.");
-                const data = await response.json();
+                setLoading(true);
+                const response = await axios.get(
+                    `${BASE_URL}/attendance/attendance-all/${employeeId}`
+                );
+                
+                const data = response.data;
                 data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                
                 setAllAttendanceRecords(data);
-                const today = new Date().toISOString().split("T")[0];
-                setAttendanceRecords(data.filter(record =>
-                    new Date(record.createdAt).toISOString().split("T")[0] === today
-                ));
+                // Display all records by default instead of filtering today's data
+                setAttendanceRecords(data);
+                setError(null);
             } catch (err) {
-                setError(err.message);
+                const errorMessage = err.response?.data?.message || err.message || "Failed to fetch attendance data.";
+                setError(errorMessage);
+                console.error("Error fetching attendance:", err);
             } finally {
                 setLoading(false);
             }
         };
-        fetchAttendance();
+        
+        if (employeeId) {
+            fetchAttendance();
+        }
     }, [role, employeeId]);
 
     const openDetailsModal = (record) => { setCurrentRecordDetails(record); setShowDetailsModal(true); };
@@ -79,28 +91,49 @@ const AttendanceTable = () => {
     const handleAttachmentChange = (e) => { setAttachment(e.target.files[0]); };
 
     const submitWorkReport = async () => {
-        if (!workReport.trim()) { alert("Please fill in the work report before submitting."); return; }
-        const logoutTime = new Date().toISOString(); // store ISO, format later
+        if (!workReport.trim()) {
+            alert("Please fill in the work report before submitting.");
+            return;
+        }
+
+        const logoutTime = new Date().toISOString();
         const formData = new FormData();
         formData.append("logouttime", logoutTime);
         formData.append("workReport", workReport);
-        if (attachment) formData.append("attachment", attachment);
+        if (attachment) {
+            formData.append("attachment", attachment);
+        }
 
         try {
-            const response = await fetch(`https://sensitivetechcrm.onrender.com/attendance/logout/${currentRecordId}`, { method: "PUT", body: formData });
-            if (!response.ok) throw new Error(await response.text());
-            const result = await response.json();
+            const response = await axios.put(
+                `${BASE_URL}/attendance/logout/${currentRecordId}`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+
             setAttendanceRecords(prevRecords =>
-                prevRecords.map(rec => rec._id === currentRecordId
-                    ? { ...rec, logouttime: logoutTime, workReport: workReport, attachment: result.updatedAttendance.attachment }
-                    : rec
+                prevRecords.map(rec =>
+                    rec._id === currentRecordId
+                        ? {
+                            ...rec,
+                            logouttime: logoutTime,
+                            workReport: workReport,
+                            attachment: response.data.updatedAttendance?.attachment || rec.attachment,
+                        }
+                        : rec
                 )
             );
+
             alert("Logout time and work report submitted successfully.");
             closeWorkReportModal();
         } catch (err) {
-            alert("Failed to submit work report. Please try again.");
-            console.error(err);
+            const errorMessage = err.response?.data?.message || "Failed to submit work report. Please try again.";
+            alert(errorMessage);
+            console.error("Error submitting work report:", err);
         }
     };
 
@@ -283,22 +316,32 @@ const AttendanceTable = () => {
             <div className="overflow-x-auto bg-white shadow-md rounded-lg">
                 <table {...getTableProps()} className="w-full text-center min-w-[900px]">
                     <thead className="bg-[#2563eb] text-white border-b sticky top-0">
-                        {headerGroups.map((headerGroup, hgIndex) => (
-                            <tr key={hgIndex} {...headerGroup.getHeaderGroupProps()}>
-                                {headerGroup.headers.map((column) => (
-                                    <th key={column.id} {...column.getHeaderProps(column.getSortByToggleProps())} className="p-4">{column.render("Header")}</th>
-                                ))}
-                            </tr>
-                        ))}
+                        {headerGroups.map((headerGroup, hgIndex) => {
+                            const { key: hgKey, ...hgProps } = headerGroup.getHeaderGroupProps();
+                            return (
+                                <tr key={hgIndex} {...hgProps}>
+                                    {headerGroup.headers.map((column) => {
+                                        const { key: colKey, ...colProps } = column.getHeaderProps(column.getSortByToggleProps());
+                                        return (
+                                            <th key={column.id} {...colProps} className="p-4">{column.render("Header")}</th>
+                                        );
+                                    })}
+                                </tr>
+                            );
+                        })}
                     </thead>
                     <tbody {...getTableBodyProps()}>
                         {page.map((row, rowIndex) => {
                             prepareRow(row);
+                            const { key: rowKey, ...rowProps } = row.getRowProps();
                             return (
-                                <tr key={row.id || rowIndex} {...row.getRowProps()} className="border-b hover:bg-gray-50">
-                                    {row.cells.map((cell) => (
-                                        <td key={cell.column.id} {...cell.getCellProps()} className="p-6">{cell.render("Cell")}</td>
-                                    ))}
+                                <tr key={row.id || rowIndex} {...rowProps} className="border-b hover:bg-gray-50">
+                                    {row.cells.map((cell) => {
+                                        const { key: cellKey, ...cellProps } = cell.getCellProps();
+                                        return (
+                                            <td key={cell.column.id} {...cellProps} className="p-6">{cell.render("Cell")}</td>
+                                        );
+                                    })}
                                 </tr>
                             );
                         })}

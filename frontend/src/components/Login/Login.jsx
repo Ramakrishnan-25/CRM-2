@@ -755,10 +755,24 @@ const LoginPage = () => {
         }
       }
     } catch (error) {
-      if (error.response?.status === 404) {
-        setError("Email not found. Please check your email address.");
+      // Handle error response from backend
+      if (error.response) {
+        const status = error.response.status;
+        const message = error.response.data?.message;
+        
+        if (status === 404) {
+          setError("Invalid Username");
+        } else if (status === 403) {
+          setError("Your login ID is Inactive, Contact Admin");
+        } else if (status === 400) {
+          setError(message || "Invalid request. Please check your email.");
+        } else {
+          setError(message || "Failed to send OTP. Please try again later.");
+        }
+      } else if (error.request) {
+        setError("Network error. Please check your connection.");
       } else {
-        setError("Failed to send OTP. Please try again later.");
+        setError("An error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -828,8 +842,26 @@ const LoginPage = () => {
           setDisplayOtp(response.data.otp);
         }
       }
-    } catch {
-      setError("Failed to resend OTP.");
+    } catch (error) {
+      // Handle error response from backend
+      if (error.response) {
+        const status = error.response.status;
+        const message = error.response.data?.message;
+        
+        if (status === 404) {
+          setError("Invalid Username");
+        } else if (status === 403) {
+          setError("Your login ID is Inactive, Contact Admin");
+        } else if (status === 400) {
+          setError(message || "Invalid request. Please check your email.");
+        } else {
+          setError(message || "Failed to resend OTP.");
+        }
+      } else if (error.request) {
+        setError("Network error. Please check your connection.");
+      } else {
+        setError("An error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -844,12 +876,14 @@ const LoginPage = () => {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       setLoading(true);
+      setError("");
+      
       const res = await googleLogin(credentialResponse.credential);
-
       const employeeData = res.data.employee || res.data.admin;
 
+      // Check if employee is active (additional safety check)
       if (employeeData.status?.toLowerCase().trim() !== "active") {
-        setError("Your account is inactive. Contact admin.");
+        setError("Your login ID is Inactive, Contact Admin");
         return;
       }
 
@@ -867,8 +901,28 @@ const LoginPage = () => {
           ? "/dashboard"
           : "/attendance-form"
       );
-    } catch {
-      setError("Google Login Failed");
+    } catch (error) {
+      // Handle error response from backend
+      if (error.response) {
+        const status = error.response.status;
+        const message = error.response.data?.message;
+        
+        if (status === 404) {
+          setError("Invalid Username");
+        } else if (status === 403) {
+          setError("Your login ID is Inactive, Contact Admin");
+        } else if (status === 400) {
+          setError(message || "Invalid request. Please try again.");
+        } else if (status === 500) {
+          setError(message || "Server error. Please try again later.");
+        } else {
+          setError(message || "Google Login Failed");
+        }
+      } else if (error.request) {
+        setError("Network error. Please check your connection.");
+      } else {
+        setError("Google Login Failed");
+      }
     } finally {
       setLoading(false);
     }
@@ -934,6 +988,15 @@ return (
       {/* GOOGLE */}
       {loginMethod === "google" && (
         <div className="text-center text-white space-y-4">
+          {error && (
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-md">
+              <div className="flex items-center">
+                <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            </div>
+          )}
+          
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={() => setError("Google Login Failed")}
@@ -944,6 +1007,14 @@ return (
       {/* EMAIL */}
       {loginMethod === "email" && (
         <div className="space-y-4 text-white">
+          {error && (
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-md">
+              <div className="flex items-center">
+                <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            </div>
+          )}
 
           {displayOtp && (
             <div className="bg-yellow-200 text-black p-3 rounded flex justify-between items-center">

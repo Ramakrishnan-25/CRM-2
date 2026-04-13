@@ -101,10 +101,9 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 // ---------------- ROUTES ----------------
-app.use("/", attendanceRoutes);
+app.use("/attendance", attendanceRoutes);
 app.use("/clients", clientRoutes);
 app.use("/leaves", leaveRoutes);
-app.use("/api/attendance", attendanceRoutes);
 app.use("/leads", leadRoutes);
 app.use("/payroll", payrollRoutes);
 app.use("/updatelog", updateLogRoutes);

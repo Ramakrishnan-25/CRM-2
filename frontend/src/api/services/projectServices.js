@@ -318,7 +318,7 @@ export const getAttendance = async () => {
 // Admin: Get employees present today
 export const getTodayPresentCount = async () => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/attendance/present-today`);
+    const response = await projectServices.get(`/attendance/present-today`);
     return response;
   } catch (error) {
     console.error("Error fetching today present count:", error);
@@ -330,7 +330,7 @@ export const getTodayPresentCount = async () => {
 // Employee: Get monthly attendance using userId
 export const getMyMonthlyAttendance = async (stid) => {
   try {
-    const response = await projectServices.get(`/api/attendance/employee/monthly-attendance/${stid}`);
+    const response = await projectServices.get(`/attendance/employee/monthly-attendance/${stid}`);
     return response;
   } catch (err) {
     return err;

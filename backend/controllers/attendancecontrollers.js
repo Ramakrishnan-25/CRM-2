@@ -42,13 +42,17 @@ exports.getAllAttendance = async (req, res) => {
         } 
 
         let attendanceRecords; 
-        if (empdata.role === "admin") { 
+        // Admin roles: "admin", "Superadmin", "HR Admin" (show all attendance)
+        // Employee role: show only their own attendance
+        const isAdmin = empdata.role === "admin" || empdata.role === "Superadmin" || empdata.role === "HR Admin";
+        
+        if (isAdmin) { 
             attendanceRecords = await attendanceModel.find().sort({ createdAt: -1 }); 
         } else { 
             attendanceRecords = await attendanceModel.find({ employeeId: empdata._id }).sort({ createdAt: -1 }); 
         } 
 
-        console.log("GET Attendance Records:", attendanceRecords); 
+        console.log(`GET Attendance Records (${isAdmin ? "ALL" : "EMPLOYEE"}):`, attendanceRecords.length); 
         res.status(200).json(attendanceRecords); 
     } 
     catch (error) { 
