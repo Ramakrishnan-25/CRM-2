@@ -18,6 +18,10 @@ const sendOTP = async (req, res) => {
   try {
     const { email } = req.body;
 
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
     const empData = await Employee.findOne({ email });
     if (!empData) {
       return res.status(404).json({ message: "Employee not found" });
@@ -35,17 +39,28 @@ const sendOTP = async (req, res) => {
       expiry: Date.now() + 5 * 60 * 1000
     });
 
-    await sendEmail({
-      to: email,
-      subject: "Your Login Verification Code",
-      html: `<h2>Your OTP is ${otp}</h2><p>Valid for 5 minutes.</p>`
-    });
+    try {
+      await sendEmail({
+        to: email,
+        subject: "Your Login Verification Code",
+        html: `<h2>Your OTP is ${otp}</h2><p>Valid for 5 minutes.</p>`
+      });
 
-    console.log("OTP sent successfully",otp);
+      console.log("✓ OTP sent successfully to", email);
 
-    return res.status(200).json({
-      message: "OTP sent successfully"
-    });
+      return res.status(200).json({
+        message: "OTP sent successfully"
+      });
+    } catch (emailError) {
+      // Remove OTP from store if email failed
+      otpStore.delete(email);
+      console.error("Email service error:", emailError.message);
+      
+      return res.status(500).json({ 
+        message: "Failed to send OTP. Email service error.", 
+        error: process.env.NODE_ENV === 'development' ? emailError.message : undefined
+      });
+    }
 
   } catch (err) {
     console.error("Send OTP error:", err);
